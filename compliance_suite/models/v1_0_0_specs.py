@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional
 
-from pydantic import AnyUrl, BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field, EmailStr, validator
 
 
 class TesCancelTaskResponse(BaseModel):
