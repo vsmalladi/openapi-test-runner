@@ -295,7 +295,7 @@ class Service(BaseModel):
     organization: Organization = Field(
         ..., description='Organization providing the service'
     )
-    contactUrl: Optional[AnyUrl] = Field(
+    contactUrl: Optional[str] = Field(
         None,
         description='URL of the contact for the provider of this service, e.g. a link to a contact form '
                     '(RFC 3986 format), or an email (RFC 2368 format).',
@@ -332,6 +332,19 @@ class Service(BaseModel):
                     'be changed whenever the service is updated.',
         example='1.0.0',
     )
+
+    @validator('contactUrl')
+    def check_url_or_email(cls, value):
+        if value.startswith("mailto:"):
+            email = value[len("mailto:"):]
+            if EmailStr.validate(email):
+                return value
+            else:
+                raise ValueError("Invalid email address")
+        elif AnyUrl.validate(value):
+            return value
+        else:
+            raise ValueError("Invalid URL")
 
 
 class TesServiceType(ServiceType):
