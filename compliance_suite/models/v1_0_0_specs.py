@@ -12,6 +12,7 @@ from typing import Dict, List, Optional
 from pydantic import AnyUrl, BaseModel, Field, EmailStr, validator, ValidationError
 from pydantic.tools import parse_obj_as
 
+
 class TesCancelTaskResponse(BaseModel):
     pass
 
