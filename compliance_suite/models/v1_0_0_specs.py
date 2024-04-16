@@ -337,14 +337,17 @@ class Service(BaseModel):
     def check_url_or_email(cls, value):
         if value.startswith("mailto:"):
             email = value[len("mailto:"):]
-            if EmailStr.validate(email):
+            try:
+                EmailStr.validate(email)
                 return value
-            else:
+            except ValidationError:
                 raise ValueError("Invalid email address")
-        elif AnyUrl.validate(value):
-            return value
         else:
-            raise ValueError("Invalid URL")
+            try:
+                parse_obj_as(AnyUrl, value)
+                return value
+            except ValidationError:
+                raise ValueError("Invalid URL")
 
 
 class TesServiceType(ServiceType):
