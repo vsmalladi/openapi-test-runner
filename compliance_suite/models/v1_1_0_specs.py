@@ -9,7 +9,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional
 
-from pydantic import AnyUrl, BaseModel, Field
+from pydantic import AnyUrl, BaseModel, Field, EmailStr, validator, ValidationError
+from pydantic.tools import parse_obj_as
 
 
 class TesCancelTaskResponse(BaseModel):
@@ -341,7 +342,7 @@ class Service(BaseModel):
     organization: Organization = Field(
         ..., description='Organization providing the service'
     )
-    contactUrl: Optional[AnyUrl] = Field(
+    contactUrl: Optional[str] = Field(
         None,
         description='URL of the contact for the provider of this service, e.g. a link to a contact form '
                     '(RFC 3986 format), or an email (RFC 2368 format).',
@@ -378,6 +379,22 @@ class Service(BaseModel):
                     'be changed whenever the service is updated.',
         example='1.0.0',
     )
+
+    @validator('contactUrl')
+    def check_url_or_email(cls, value):
+        if value.startswith("mailto:"):
+            email = value[len("mailto:"):]
+            try:
+                EmailStr.validate(email)
+                return value
+            except ValidationError:
+                raise ValueError("Invalid email address")
+        else:
+            try:
+                parse_obj_as(AnyUrl, value)
+                return value
+            except ValidationError:
+                raise ValueError("Invalid URL")
 
 
 class TesServiceType(ServiceType):
